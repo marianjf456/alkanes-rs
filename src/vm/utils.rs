@@ -278,7 +278,7 @@ pub fn run_after_special(
     #[cfg(feature = "debug-log")]
     {
         // Log storage fuel cost
-        let computed_storage_fuel = compute_extcall_fuel(storage_len).unwrap_or(0);
+        let computed_storage_fuel = FUEL_PER_STORE_BYTE.checked_mul(storage_len).unwrap_or(0);
         println!("  - Storage fuel cost: {}", computed_storage_fuel);
     }
 
