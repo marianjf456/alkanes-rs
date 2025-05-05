@@ -912,6 +912,8 @@ impl Protorune {
                             Some(sheet) => sheet.clone(),
                             None => BalanceSheet::default(),
                         };
+                        let mut proto_balances_by_output_message_checkpoint =
+                            proto_balances_by_output.clone();
                         stone.process_message::<T>(
                             &mut atomic.derive(&IndexPointer::default()),
                             tx,
@@ -920,15 +922,16 @@ impl Protorune {
                             height,
                             runestone_output_index,
                             shadow_vout,
-                            &mut proto_balances_by_output,
+                            &mut proto_balances_by_output_message_checkpoint,
                             protostone_unallocated_to,
                             num_protostones,
                         )?;
                         // Get the post-message balance to use for edicts
-                        prior_balance_sheet = match proto_balances_by_output.get(&refund) {
-                            Some(sheet) => sheet.clone(),
-                            None => prior_balance_sheet,
-                        };
+                        prior_balance_sheet =
+                            match proto_balances_by_output_message_checkpoint.get(&refund) {
+                                Some(sheet) => sheet.clone(),
+                                None => prior_balance_sheet,
+                            };
                     } else {
                         prior_balance_sheet = match proto_balances_by_output.remove(&shadow_vout) {
                             Some(sheet) => sheet.clone(),
@@ -946,13 +949,11 @@ impl Protorune {
                     )?;
 
                     // Handle any remaining balance
-                    if !is_message {
-                        Self::handle_leftover_runes(
-                            &mut prior_balance_sheet,
-                            &mut proto_balances_by_output,
-                            protostone_unallocated_to,
-                        )?;
-                    }
+                    Self::handle_leftover_runes(
+                        &mut prior_balance_sheet,
+                        &mut proto_balances_by_output,
+                        protostone_unallocated_to,
+                    )?;
 
                     Ok(())
                 })
