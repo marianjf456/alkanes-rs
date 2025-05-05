@@ -3,7 +3,7 @@ use crate::{
     message::{MessageContext, MessageContextParcel},
     protoburn::{Protoburn, Protoburns},
 };
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use bitcoin::{Block, Transaction, Txid};
 use metashrew_core::index_pointer::{AtomicPointer, IndexPointer};
 use ordinals::Runestone;
@@ -64,7 +64,6 @@ pub trait MessageProcessor {
         _runestone_output_index: u32,
         protomessage_vout: u32,
         balances_by_output: &mut HashMap<u32, BalanceSheet<AtomicPointer>>,
-        default_output: u32,
         num_protostones: usize,
     ) -> Result<bool>;
 }
@@ -79,13 +78,14 @@ impl MessageProcessor for Protostone {
         _runestone_output_index: u32,
         protomessage_vout: u32,
         balances_by_output: &mut HashMap<u32, BalanceSheet<AtomicPointer>>,
-        default_output: u32,
         num_protostones: usize,
     ) -> Result<bool> {
         // Validate output indexes and protomessage_vout
         let num_outputs = transaction.output.len();
-        let pointer = self.pointer.unwrap_or(default_output);
-        let refund_pointer = self.refund.unwrap_or(default_output);
+        let pointer = self.pointer.ok_or_else(|| anyhow!("Missing pointer"))?;
+        let refund_pointer = self
+            .refund
+            .ok_or_else(|| anyhow!("Missing refund pointer"))?;
 
         // Ensure pointers are valid transaction outputs
         if pointer > (num_outputs + num_protostones) as u32
