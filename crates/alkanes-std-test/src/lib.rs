@@ -82,6 +82,9 @@ enum LoggerAlkaneMessage {
     #[opcode(99)]
     #[returns(Vec<u8>)]
     ReturnDefaultData,
+
+    #[opcode(100)]
+    Revert,
 }
 
 impl LoggerAlkane {
@@ -314,6 +317,10 @@ impl LoggerAlkane {
         response.data = (total_elements as u128).to_le_bytes().to_vec();
 
         Ok(response)
+    }
+
+    fn revert(&self) -> Result<CallResponse> {
+        Err(anyhow!("Revert"))
     }
 }
 

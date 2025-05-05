@@ -899,7 +899,7 @@ impl Protorune {
                         None => default_output(tx),
                     };
                     // README: now calculates the amount left over for edicts in this fashion:
-                    // the protomessage is executed first, and all the runes that go to the refund pointer are available for the edicts to then transfer
+                    // the protomessage is executed first, and all the runes that go to the pointer are available for the edicts to then transfer, as long as the protomessage succeeded
                     // if there is no protomessage, all incoming runes will be available to be transferred by the edict
                     let mut prior_balance_sheet = BalanceSheet::default();
                     let mut did_message_fail_and_refund = false;
