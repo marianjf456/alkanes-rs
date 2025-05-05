@@ -3,7 +3,7 @@ use crate::{
     message::{MessageContext, MessageContextParcel},
     protoburn::{Protoburn, Protoburns},
 };
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use bitcoin::{Block, Transaction, Txid};
 use metashrew_core::index_pointer::{AtomicPointer, IndexPointer};
 use ordinals::Runestone;
@@ -53,6 +53,7 @@ pub trait MessageProcessor {
     ///                 will hold balances before the process message
     ///   balances_by_output: The running store of balances by each transaction output for
     ///                       the current transaction being handled.
+    /// Return: true if success, false if failure and refunded to refund pointer
     fn process_message<T: MessageContext>(
         &self,
         atomic: &mut AtomicPointer,
@@ -63,9 +64,8 @@ pub trait MessageProcessor {
         _runestone_output_index: u32,
         protomessage_vout: u32,
         balances_by_output: &mut HashMap<u32, BalanceSheet<AtomicPointer>>,
-        default_output: u32,
         num_protostones: usize,
-    ) -> Result<()>;
+    ) -> Result<bool>;
 }
 impl MessageProcessor for Protostone {
     fn process_message<T: MessageContext>(
@@ -78,13 +78,14 @@ impl MessageProcessor for Protostone {
         _runestone_output_index: u32,
         protomessage_vout: u32,
         balances_by_output: &mut HashMap<u32, BalanceSheet<AtomicPointer>>,
-        default_output: u32,
         num_protostones: usize,
-    ) -> Result<()> {
+    ) -> Result<bool> {
         // Validate output indexes and protomessage_vout
         let num_outputs = transaction.output.len();
-        let pointer = self.pointer.unwrap_or(default_output);
-        let refund_pointer = self.refund.unwrap_or(default_output);
+        let pointer = self.pointer.ok_or_else(|| anyhow!("Missing pointer"))?;
+        let refund_pointer = self
+            .refund
+            .ok_or_else(|| anyhow!("Missing refund pointer"))?;
 
         // Ensure pointers are valid transaction outputs
         if pointer > (num_outputs + num_protostones) as u32
@@ -160,7 +161,10 @@ impl MessageProcessor for Protostone {
                     pointer,
                     refund_pointer,
                 ) {
-                    Ok(_) => atomic.commit(),
+                    Ok(_) => {
+                        atomic.commit();
+                        Ok(true)
+                    }
                     Err(e) => {
                         println!("Got error inside reconcile! {:?} \n\n", e);
                         println!("Refunding to refund_pointer: {}", refund_pointer);
@@ -179,7 +183,8 @@ impl MessageProcessor for Protostone {
                             protomessage_vout,
                             refund_pointer,
                         )?;
-                        atomic.rollback()
+                        atomic.rollback();
+                        Ok(false)
                     }
                 }
             }
@@ -201,9 +206,10 @@ impl MessageProcessor for Protostone {
 
                 refund_to_refund_pointer(balances_by_output, protomessage_vout, refund_pointer)?;
                 atomic.rollback();
+
+                Ok(false)
             }
         }
-        Ok(())
     }
 }
 

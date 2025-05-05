@@ -902,19 +902,9 @@ impl Protorune {
                     // the protomessage is executed first, and all the runes that go to the refund pointer are available for the edicts to then transfer
                     // if there is no protomessage, all incoming runes will be available to be transferred by the edict
                     let mut prior_balance_sheet = BalanceSheet::default();
-                    let is_message = stone.is_message();
-                    if is_message {
-                        let refund = stone
-                            .refund
-                            .ok_or_else(|| anyhow!("Missing refund pointer"))?;
-                        // Start with a fresh balance sheet for edicts
-                        prior_balance_sheet = match proto_balances_by_output.get(&refund) {
-                            Some(sheet) => sheet.clone(),
-                            None => BalanceSheet::default(),
-                        };
-                        let mut proto_balances_by_output_message_checkpoint =
-                            proto_balances_by_output.clone();
-                        stone.process_message::<T>(
+                    let mut did_message_fail_and_refund = false;
+                    if stone.is_message() {
+                        let success = stone.process_message::<T>(
                             &mut atomic.derive(&IndexPointer::default()),
                             tx,
                             txindex,
@@ -922,47 +912,46 @@ impl Protorune {
                             height,
                             runestone_output_index,
                             shadow_vout,
-                            &mut proto_balances_by_output_message_checkpoint,
-                            protostone_unallocated_to,
+                            &mut proto_balances_by_output,
                             num_protostones,
                         )?;
-                        // Get the post-message balance to use for edicts
-                        prior_balance_sheet =
-                            match proto_balances_by_output_message_checkpoint.get(&refund) {
-                                Some(sheet) => sheet.clone(),
-                                None => prior_balance_sheet,
-                            };
+                        did_message_fail_and_refund = !success;
+                        if success {
+                            // Get the post-message balance to use for edicts
+                            prior_balance_sheet =
+                                match proto_balances_by_output.remove(&protostone_unallocated_to) {
+                                    Some(sheet) => sheet.clone(),
+                                    None => prior_balance_sheet,
+                                };
+                        }
                     } else {
                         prior_balance_sheet = match proto_balances_by_output.remove(&shadow_vout) {
                             Some(sheet) => sheet.clone(),
                             None => prior_balance_sheet,
                         };
                     }
+                    // edicts should only transfer protostones that did not fail the protomessage (if there is one)
+                    if !did_message_fail_and_refund {
+                        // Process edicts using the current balance state
+                        Self::process_edicts(
+                            tx,
+                            &stone.edicts,
+                            &mut proto_balances_by_output,
+                            &mut prior_balance_sheet,
+                            &tx.output,
+                        )?;
 
-                    // Process edicts using the current balance state
-                    Self::process_edicts(
-                        tx,
-                        &stone.edicts,
-                        &mut proto_balances_by_output,
-                        &mut prior_balance_sheet,
-                        &tx.output,
-                    )?;
-
-                    // Handle any remaining balance
-                    Self::handle_leftover_runes(
-                        &mut prior_balance_sheet,
-                        &mut proto_balances_by_output,
-                        protostone_unallocated_to,
-                    )?;
+                        // Handle any remaining balance
+                        Self::handle_leftover_runes(
+                            &mut prior_balance_sheet,
+                            &mut proto_balances_by_output,
+                            protostone_unallocated_to,
+                        )?;
+                    }
 
                     Ok(())
                 })
                 .collect::<Result<()>>()?;
-            // println!(
-            //     "protocol id: {}, saving sheets: {:#?}",
-            //     T::protocol_tag(),
-            //     proto_balances_by_output
-            // );
             Self::save_balances::<T>(
                 height,
                 &mut atomic.derive(&IndexPointer::default()),
