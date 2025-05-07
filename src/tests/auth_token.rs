@@ -241,9 +241,7 @@ fn test_owned_token_set_name_and_symbol() -> Result<()> {
     // For a long name that spans multiple u128s
     // "SuperLongCustomTokenNameThatSpansMultipleU128Values" (49 characters)
     let name_data1 = u128::from_le_bytes(*b"SuperLongCustomT");
-    let name_data2 = u128::from_le_bytes(*b"okenNameThatSpan");
-    let name_data3 = u128::from_le_bytes(*b"nsMultipleU128Va");
-    let name_data4 = u128::from_le_bytes(*b"alues\0\0\0\0\0\0\0\0\0\0\0");
+    let name_data2 = u128::from_le_bytes(*b"okenNameThatSpa\0");
 
     // For "SLCT" symbol (4 characters)
     let symbol_data = u128::from_le_bytes(*b"SLCT\0\0\0\0\0\0\0\0\0\0\0\0");
@@ -257,8 +255,6 @@ fn test_owned_token_set_name_and_symbol() -> Result<()> {
             1000,        /* owned_token token_units */
             name_data1,  // first part of the name
             name_data2,  // second part of the name
-            name_data3,  // third part of the name
-            name_data4,  // fourth part of the name with null terminator
             symbol_data, // null-terminated symbol data
         ],
     };

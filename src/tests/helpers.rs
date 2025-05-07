@@ -358,7 +358,7 @@ pub fn assert_token_id_has_no_deployment(token_id: AlkaneId) -> Result<()> {
     return Ok(());
 }
 
-fn get_sheet_for_outpoint(
+pub fn get_sheet_for_outpoint(
     test_block: &Block,
     tx_num: usize,
     vout: u32,
