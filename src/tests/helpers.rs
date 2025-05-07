@@ -190,7 +190,11 @@ pub fn create_protostone_tx_with_inputs_and_default_pointer(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     let address: Address<NetworkChecked> = get_address(&ADDRESS1().as_str());
     let _script_pubkey = address.script_pubkey();
@@ -300,7 +304,11 @@ pub fn create_multiple_cellpack_with_witness_and_txins_edicts(
             op_return.size()
         );
     }
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     let address: Address<NetworkChecked> = get_address(&ADDRESS1().as_str());
 

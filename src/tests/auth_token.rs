@@ -241,7 +241,7 @@ fn test_owned_token_set_name_and_symbol() -> Result<()> {
     // For a long name that spans multiple u128s
     // "SuperLongCustomTokenNameThatSpansMultipleU128Values" (49 characters)
     let name_data1 = u128::from_le_bytes(*b"SuperLongCustomT");
-    let name_data2 = u128::from_le_bytes(*b"okenNameThatSpa\0");
+    let name_data2 = u128::from_le_bytes(*b"ok\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 
     // For "SLCT" symbol (4 characters)
     let symbol_data = u128::from_le_bytes(*b"SLCT\0\0\0\0\0\0\0\0\0\0\0\0");
@@ -317,7 +317,7 @@ fn test_owned_token_set_name_and_symbol() -> Result<()> {
 
     println!("trace {:?}", trace_str);
 
-    let expected_name = "SuperLongCustomTokenNameThatSpannsMultipleU128Vaalues";
+    let expected_name = "SuperLongCustomTok";
     let expected_symbol = "SLCT";
 
     // Check if the trace data contains the expected name

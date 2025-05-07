@@ -351,7 +351,11 @@ pub fn create_tx_from_runestone(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     let mut txouts = additional_txouts.clone();
     txouts.push(op_return);
@@ -414,7 +418,11 @@ pub fn create_rune_etching_transaction(config: &RunesTestingConfig) -> Transacti
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     Transaction {
         version: Version::ONE,
@@ -474,7 +482,11 @@ pub fn create_rune_transfer_transaction(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     Transaction {
         version: Version::ONE,
@@ -584,7 +596,11 @@ pub fn create_transaction_with_middle_op_return(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     Transaction {
         version: Version::ONE,
@@ -717,7 +733,11 @@ pub fn create_protostone_encoded_tx(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     Transaction {
         version: Version::ONE,
@@ -793,7 +813,11 @@ pub fn create_multi_protoburn_transaction(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     let mut output = burn_protocol_ids
         .into_iter()
@@ -899,7 +923,11 @@ pub fn create_protostone_transaction(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     Transaction {
         version: Version::ONE,
@@ -977,7 +1005,11 @@ pub fn create_multiple_protomessage_from_edict_tx(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
     outs.push(op_return);
     Transaction {
         version: Version::ONE,
@@ -1056,7 +1088,11 @@ pub fn create_protomessage_from_edict_tx(
     };
 
     // op return must be less than 80 bytes or else miners will not accept it
-    assert!(op_return.size() <= 80);
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
 
     Transaction {
         version: Version::ONE,
