@@ -78,7 +78,7 @@ pub trait MintableToken {
         self.set_total_supply(overflow_error(self.total_supply().checked_add(v))?);
         Ok(())
     }
-    fn burn(&self, v: u128) -> Result<()> {
+    fn decrease_total_supply(&self, v: u128) -> Result<()> {
         self.set_total_supply(overflow_error(self.total_supply().checked_sub(v))?);
         Ok(())
     }
