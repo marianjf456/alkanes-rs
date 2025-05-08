@@ -7,7 +7,7 @@ use bitcoin::{OutPoint, ScriptBuf, Sequence, TxIn, Witness};
 use protorune_support::protostone::ProtostoneEdict;
 
 use crate::index_block;
-use crate::tests::helpers::{self as alkane_helpers};
+use crate::tests::helpers::{self as alkane_helpers, get_sheet_for_runtime};
 use alkane_helpers::clear;
 use alkanes::view;
 #[allow(unused_imports)]
@@ -180,6 +180,73 @@ fn test_mint_underflow() -> Result<()> {
 
     assert_eq!(sheet.get_cached(&ProtoruneRuneId { block: 2, tx: 0 }), 0);
     assert_eq!(sheet.get_cached(&ProtoruneRuneId { block: 2, tx: 1 }), 0);
+
+    let outpoint = OutPoint {
+        txid: test_block.txdata.last().unwrap().compute_txid(),
+        vout: 3,
+    };
+
+    alkane_helpers::assert_revert_context(&outpoint, "overflow error")?;
+    Ok(())
+}
+
+#[wasm_bindgen_test]
+fn test_transfer_runtime() -> Result<()> {
+    clear();
+    let block_height = 840_000;
+
+    // Create a cellpack to call the process_numbers method (opcode 11)
+    let arb_mint_cellpack = Cellpack {
+        target: AlkaneId { block: 1, tx: 0 },
+        inputs: vec![30, 2, 1, 1_000_000],
+    };
+
+    let send_cellpack = Cellpack {
+        target: AlkaneId { block: 2, tx: 1 },
+        inputs: vec![3],
+    };
+
+    let create_another_cellpack = Cellpack {
+        target: AlkaneId { block: 5, tx: 1 },
+        inputs: vec![50],
+    };
+
+    let steal_cellpack = Cellpack {
+        target: AlkaneId { block: 2, tx: 2 },
+        inputs: vec![30, 2, 1, 1_000_000],
+    };
+
+    // Initialize the contract and execute the cellpacks
+    let mut test_block = alkane_helpers::init_with_multiple_cellpacks_with_tx(
+        [
+            alkanes_std_test_build::get_bytes(),
+            [].into(),
+            [].into(),
+            [].into(),
+        ]
+        .into(),
+        [
+            arb_mint_cellpack,
+            send_cellpack,
+            create_another_cellpack,
+            steal_cellpack,
+        ]
+        .into(),
+    );
+
+    index_block(&test_block, block_height)?;
+
+    let sheet = alkane_helpers::get_last_outpoint_sheet(&test_block)?;
+
+    println!("Last sheet: {:?}", sheet);
+    let runtime_sheet = get_sheet_for_runtime();
+
+    assert_eq!(
+        runtime_sheet.get_cached(&ProtoruneRuneId { block: 2, tx: 1 }),
+        1000000
+    );
+    assert_eq!(sheet.get_cached(&ProtoruneRuneId { block: 2, tx: 1 }), 0);
+    assert_eq!(sheet.get_cached(&ProtoruneRuneId { block: 2, tx: 2 }), 0);
 
     let outpoint = OutPoint {
         txid: test_block.txdata.last().unwrap().compute_txid(),
