@@ -17,7 +17,7 @@ use wasm_bindgen_test::wasm_bindgen_test;
 fn create_malformed_cellpack_large_inputs() -> Cellpack {
     Cellpack {
         target: AlkaneId { block: 1, tx: 0 },
-        inputs: vec![u128::MAX, u128::MAX - 1, u128::MAX - 2], // Extremely large inputs
+        inputs: vec![u128::MAX], // Extremely large inputs
     }
 }
 

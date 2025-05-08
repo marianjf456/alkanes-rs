@@ -312,6 +312,13 @@ mod tests {
             script_pubkey: runestone,
         };
 
+        // op return must be less than 80 bytes or else miners will not accept it
+        assert!(
+            op_return.size() <= 80,
+            "op return ({}) > 80 bytes",
+            op_return.size()
+        );
+
         helpers::create_block_with_txs(vec![Transaction {
             version: bitcoin::transaction::Version(2),
             lock_time: bitcoin::absolute::LockTime::ZERO,

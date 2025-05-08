@@ -188,6 +188,14 @@ pub fn create_protostone_tx_with_inputs_and_default_pointer(
         value: Amount::from_sat(0),
         script_pubkey: runestone,
     };
+
+    // op return must be less than 80 bytes or else miners will not accept it
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
+
     let address: Address<NetworkChecked> = get_address(&ADDRESS1().as_str());
     let _script_pubkey = address.script_pubkey();
     let mut _outputs = outputs.clone();
@@ -288,6 +296,20 @@ pub fn create_multiple_cellpack_with_witness_and_txins_edicts(
         value: Amount::from_sat(0),
         script_pubkey: runestone,
     };
+
+    // op return must be less than 80 bytes or else miners will not accept it
+    if (op_return.size() > 80) {
+        println!(
+            "op return size: {} greater than 80 bytes! This is dangerous",
+            op_return.size()
+        );
+    }
+    assert!(
+        op_return.size() <= 80,
+        "op return ({}) > 80 bytes",
+        op_return.size()
+    );
+
     let address: Address<NetworkChecked> = get_address(&ADDRESS1().as_str());
 
     let script_pubkey = address.script_pubkey();
@@ -344,7 +366,7 @@ pub fn assert_token_id_has_no_deployment(token_id: AlkaneId) -> Result<()> {
     return Ok(());
 }
 
-fn get_sheet_for_outpoint(
+pub fn get_sheet_for_outpoint(
     test_block: &Block,
     tx_num: usize,
     vout: u32,
