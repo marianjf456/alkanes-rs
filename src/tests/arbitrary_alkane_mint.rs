@@ -7,7 +7,7 @@ use bitcoin::{OutPoint, ScriptBuf, Sequence, TxIn, Witness};
 use protorune_support::protostone::ProtostoneEdict;
 
 use crate::index_block;
-use crate::tests::helpers::{self as alkane_helpers};
+use crate::tests::helpers::{self as alkane_helpers, get_sheet_for_runtime};
 use alkane_helpers::clear;
 use alkanes::view;
 #[allow(unused_imports)]
@@ -239,7 +239,12 @@ fn test_transfer_runtime() -> Result<()> {
     let sheet = alkane_helpers::get_last_outpoint_sheet(&test_block)?;
 
     println!("Last sheet: {:?}", sheet);
+    let runtime_sheet = get_sheet_for_runtime();
 
+    assert_eq!(
+        runtime_sheet.get_cached(&ProtoruneRuneId { block: 2, tx: 1 }),
+        1000000
+    );
     assert_eq!(sheet.get_cached(&ProtoruneRuneId { block: 2, tx: 1 }), 0);
     assert_eq!(sheet.get_cached(&ProtoruneRuneId { block: 2, tx: 2 }), 0);
 
