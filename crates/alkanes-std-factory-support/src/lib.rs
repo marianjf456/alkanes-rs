@@ -78,6 +78,10 @@ pub trait MintableToken {
         self.set_total_supply(overflow_error(self.total_supply().checked_add(v))?);
         Ok(())
     }
+    fn decrease_total_supply(&self, v: u128) -> Result<()> {
+        self.set_total_supply(overflow_error(self.total_supply().checked_sub(v))?);
+        Ok(())
+    }
     fn mint(&self, context: &Context, value: u128) -> Result<AlkaneTransfer> {
         self.increase_total_supply(value)?;
         Ok(AlkaneTransfer {
