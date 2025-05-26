@@ -22,7 +22,7 @@ use protorune::message::{MessageContext, MessageContextParcel};
 #[allow(unused_imports)]
 use protorune::tables::{RuneTable, RUNES};
 use protorune_support::balance_sheet::BalanceSheet;
-use protorune_support::utils::outpoint_encode;
+use protorune_support::utils::{outpoint_encode, tx_hex_to_txid};
 use std::sync::Arc;
 
 #[allow(unused_imports)]
@@ -192,16 +192,7 @@ pub fn genesis(block: &Block) -> Result<()> {
         }
     })?;
     let outpoint_bytes = outpoint_encode(&OutPoint {
-        txid: Txid::from_byte_array(
-            <Vec<u8> as AsRef<[u8]>>::as_ref(
-                &hex::decode(genesis::GENESIS_OUTPOINT)?
-                    .iter()
-                    .cloned()
-                    .rev()
-                    .collect::<Vec<u8>>(),
-            )
-            .try_into()?,
-        ),
+        txid: tx_hex_to_txid(genesis::GENESIS_OUTPOINT)?,
         vout: 0,
     })?;
     <AlkaneTransferParcel as TryInto<BalanceSheet<AtomicPointer>>>::try_into(
