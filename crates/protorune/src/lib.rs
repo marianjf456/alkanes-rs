@@ -29,11 +29,15 @@ use protorune_support::proto;
 use protorune_support::{
     balance_sheet::{BalanceSheet, ProtoruneRuneId},
     protostone::{into_protostone_edicts, Protostone, ProtostoneEdict},
-    utils::{consensus_encode, field_to_name, outpoint_encode},
+    utils::{consensus_encode, field_to_name, outpoint_encode, tx_hex_to_txid},
 };
 use std::collections::{HashMap, HashSet};
 use std::ops::Sub;
 use std::sync::Arc;
+
+/// Blacklisted transaction IDs that should be ignored during processing
+const BLACKLISTED_TX_HASHES: [&str; 1] =
+    ["5cbb0c466dd08d7af9223d45105fbbf0fdc9fb7cda4831c183d6b0cb5ba60fb0"];
 
 pub mod balance_sheet;
 pub mod message;
@@ -48,8 +52,6 @@ pub mod tests;
 pub mod view;
 
 pub struct Protorune(());
-
-// TODO: these library functions could move to support modules (ie protorune-support)
 
 pub fn default_output(tx: &Transaction) -> u32 {
     for i in 0..tx.output.len() {
@@ -836,6 +838,20 @@ impl Protorune {
         balances_by_output: &mut HashMap<u32, BalanceSheet<AtomicPointer>>,
         unallocated_to: u32,
     ) -> Result<()> {
+        // Check if this transaction is in the blacklist
+        let tx_id = tx.compute_txid();
+        for blacklisted_hash in BLACKLISTED_TX_HASHES.iter() {
+            match tx_hex_to_txid(blacklisted_hash) {
+                std::result::Result::Ok(blacklisted_txid) => {
+                    if tx_id == blacklisted_txid {
+                        println!("Ignoring blacklisted transaction: {}", blacklisted_hash);
+                        return Ok(());
+                    }
+                }
+                std::result::Result::Err(_) => continue,
+            }
+        }
+
         let protostones = Protostone::from_runestone(runestone)?;
 
         if protostones.len() != 0 {
