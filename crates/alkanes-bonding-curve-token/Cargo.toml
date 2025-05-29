@@ -22,3 +22,4 @@ alkanes-std-factory-support = { workspace = true }
 ordinals = { workspace = true } # Kept for now, build might show unused
 anyhow = { workspace = true }
 bitcoin = { workspace = true } # Kept for now, build might show unused
+hex = { workspace = true }
