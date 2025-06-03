@@ -59,7 +59,7 @@ impl BondingCurveToken {
         total_supply: u128,
     ) -> Result<CallResponse> {
         let context = self.context()?;
-        let mut response: CallResponse = CallResponse::forward(&context.incoming_alkanes.clone());
+        let response: CallResponse = CallResponse::forward(&context.incoming_alkanes.clone());
 
         // Set name and symbol using the MintableToken trait
         <Self as MintableToken>::set_name_and_symbol_str(self, name, symbol);
@@ -74,6 +74,8 @@ impl BondingCurveToken {
         };
         response.alkanes.0.push(minted_tokens_to_self);
 
+        // The response.alkanes is not modified here for initial minting.
+        // Tokens are tracked internally in the balances_map.
         Ok(response)
     }
 

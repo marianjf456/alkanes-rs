@@ -21,5 +21,3 @@ protorune-support = { workspace = true } # Kept for now, build might show unused
 alkanes-std-factory-support = { workspace = true }
 ordinals = { workspace = true } # Kept for now, build might show unused
 anyhow = { workspace = true }
-
-# Removed bitcoin and hex dependencies as they are no longer needed by the simplified token logic
