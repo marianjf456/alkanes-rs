@@ -1,7 +1,7 @@
 [package]
 name = "alkanes-bonding-curve-token"
 version = "0.0.0"
-description = "A bonding curve token for Alkanes with buy/sell functionality." # Updated description
+description = "A simple mintable token for Alkanes, where all tokens are held by the contract." # Updated description
 edition = "2021"
 license = "MIT"
 homepage = "https://alkanes.io"
@@ -22,6 +22,4 @@ alkanes-std-factory-support = { workspace = true }
 ordinals = { workspace = true } # Kept for now, build might show unused
 anyhow = { workspace = true }
 
-# New/updated dependencies for buy/sell functionality
-bitcoin = { version = "0.29.2", default-features = false, features = ["std", "consensus"] }
-hex = "0.4.3"
+# Removed bitcoin and hex dependencies as they are no longer needed by the simplified token logic
