@@ -25,11 +25,7 @@ impl AlkaneResponder for BondingCurveToken {}
 #[derive(MessageDispatch)]
 enum BondingCurveTokenMessage {
     #[opcode(0)]
-    Initialize {
-        name: String,
-        symbol: String,
-        total_supply: u128,
-    },
+    Initialize,
 
     #[opcode(99)]
     #[returns(String)]
@@ -52,14 +48,13 @@ impl BondingCurveToken {
     // Removed Owner, Balances, and Allowances storage methods
 
     // Refactored initialize
-    fn initialize(
-        &self,
-        name: String,
-        symbol: String,
-        total_supply: u128,
-    ) -> Result<CallResponse> {
+    fn initialize(&self) -> Result<CallResponse> {
         let context = self.context()?;
-        let response: CallResponse = CallResponse::forward(&context.incoming_alkanes.clone());
+        let mut response: CallResponse = CallResponse::forward(&context.incoming_alkanes.clone());
+
+        let name = "alkanes".to_string();
+        let symbol = "A".to_string();
+        let total_supply = 1_000_000_000_u128;
 
         // Set name and symbol using the MintableToken trait
         <Self as MintableToken>::set_name_and_symbol_str(self, name, symbol);
@@ -74,8 +69,6 @@ impl BondingCurveToken {
         };
         response.alkanes.0.push(minted_tokens_to_self);
 
-        // The response.alkanes is not modified here for initial minting.
-        // Tokens are tracked internally in the balances_map.
         Ok(response)
     }
 
