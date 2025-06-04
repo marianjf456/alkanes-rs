@@ -64,6 +64,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "alkanes-bonding-curve-token"
+version = "0.0.0"
+dependencies = [
+ "alkanes-runtime",
+ "alkanes-std-factory-support",
+ "alkanes-support",
+ "anyhow",
+ "metashrew-support",
+ "ordinals 0.2.3",
+ "protorune-support",
+]
+
+[[package]]
 name = "alkanes-build"
 version = "0.2.3"
 dependencies = [
