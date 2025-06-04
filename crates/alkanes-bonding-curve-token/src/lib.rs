@@ -1,17 +1,15 @@
 use alkanes_runtime::runtime::AlkaneResponder;
-use alkanes_runtime::{declare_alkane, imports, message::MessageDispatch}; // Removed StoragePointer
+use alkanes_runtime::{declare_alkane, message::MessageDispatch}; // Removed StoragePointer, imports
 #[allow(unused_imports)]
 use alkanes_runtime::{
     println,
     stdio::{stdout, Write},
 };
 use alkanes_std_factory_support::MintableToken;
-use bitcoin::consensus::Decodable; // For Transaction::consensus_decode
-use bitcoin::Transaction;
-use hex;
+// Removed bitcoin and hex imports
 use alkanes_support::{context::Context, id::AlkaneId, parcel::AlkaneTransfer, response::CallResponse}; // Removed StorageMap
-use anyhow::{anyhow, Result};
-use metashrew_support::compat::{to_arraybuffer_layout, to_passback_ptr};
+use anyhow::Result; // anyhow macro removed
+use metashrew_support::compat::to_arraybuffer_layout; // to_passback_ptr removed
 
 // Removed module-level storage key helpers: owner_pointer, BALANCES_PREFIX, ALLOWANCES_PREFIX
 
@@ -49,26 +47,15 @@ impl BondingCurveToken {
 
     // Refactored initialize
     fn initialize(&self) -> Result<CallResponse> {
-        let context = self.context()?;
-        let mut response: CallResponse = CallResponse::forward(&context.incoming_alkanes.clone());
+        // Get context to ensure this fundamental interaction works.
+        let _context = self.context()?; // Keep this line to test context retrieval.
 
-        let name = "alkanes".to_string();
-        let symbol = "A".to_string();
-        let total_supply = 1_000_000_000_u128;
-
-        // Set name and symbol using the MintableToken trait
-        <Self as MintableToken>::set_name_and_symbol_str(self, name, symbol);
-
-        // Update total supply using the MintableToken trait.
-        <Self as MintableToken>::increase_total_supply(self, total_supply)?;
-
-        // Create an AlkaneTransfer for the total_supply to context.myself.
-        let minted_tokens_to_self = AlkaneTransfer {
-            id: context.myself.clone(),
-            value: total_supply,
+        // Return a simple success response.
+        // We use CallResponse { data: vec![0x01], alkanes: Default::default() } to signify a boolean true success.
+        let response: CallResponse = CallResponse {
+            data: vec![0x01], // true
+            alkanes: Default::default(), // No alkanes transferred
         };
-        response.alkanes.0.push(minted_tokens_to_self);
-
         Ok(response)
     }
 
