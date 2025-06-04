@@ -1,17 +1,15 @@
 use alkanes_runtime::runtime::AlkaneResponder;
-use alkanes_runtime::{declare_alkane, imports, message::MessageDispatch}; // Removed StoragePointer
+use alkanes_runtime::{declare_alkane, message::MessageDispatch}; // Removed StoragePointer, imports
 #[allow(unused_imports)]
 use alkanes_runtime::{
     println,
     stdio::{stdout, Write},
 };
 use alkanes_std_factory_support::MintableToken;
-use bitcoin::consensus::Decodable; // For Transaction::consensus_decode
-use bitcoin::Transaction;
-use hex;
+// Removed bitcoin and hex imports
 use alkanes_support::{context::Context, id::AlkaneId, parcel::AlkaneTransfer, response::CallResponse}; // Removed StorageMap
-use anyhow::{anyhow, Result};
-use metashrew_support::compat::{to_arraybuffer_layout, to_passback_ptr};
+use anyhow::Result; // anyhow macro removed
+use metashrew_support::compat::to_arraybuffer_layout; // to_passback_ptr removed
 
 // Removed module-level storage key helpers: owner_pointer, BALANCES_PREFIX, ALLOWANCES_PREFIX
 
